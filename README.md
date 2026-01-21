@@ -1,58 +1,60 @@
-# ML_tuningQG
-
-# QG Two-Layer Model: High-Res vs Low-Res Comparison
+# ML_tuningQG: High-Res vs Low-Res QG Turbulence
 
 ## Overview
 
-This framework compares high-resolution (256x256) and low-resolution (64x64) quasi-geostrophic simulations to identify subgrid parameterization needs. The goal is to tune low-res parameters so it behaves like high-res, enabling ML-based optimization.
+This framework compares high-resolution (256x256) and low-resolution (64x64) quasi-geostrophic (QG) simulations to identify subgrid parameterization needs. The goal is to tune low-res parameters so it behaves like high-res, enabling ML-based optimization.
 
-## Files
+[![QG Simulation Demo](https://img.youtube.com/vi/pmDJhbrb-0E/0.jpg)](https://www.youtube.com/shorts/pmDJhbrb-0E)
+*Click to watch a demo of the simulation.*
 
-1. **qg_model.py** - Core QG model with subgrid parameterization support
-2. **qg_plotting.py** - Visualization functions (from previous version)
-3. **qg_comparison.py** - Statistical comparison functions
-4. **main_comparison.py** - Main execution script
+## Directory Structure
+
+- **`src/`**: Core Python models and scripts.
+- **`notebooks/`**: Jupyter notebooks for exploration and analysis.
+- **`figures/`**: Generated plots and results.
+- **`docs/`**: Experimental plans and additional documentation.
 
 ## Quick Start
 
-```bash
-python main_comparison.py
-```
+1.  **Installation**:
+    Ensure you have Python installed with `numpy`, `scipy`, `matplotlib`, and `xarray`.
 
-This will:
-1. Run high-res simulation (256x256) as ground truth
-2. Run low-res simulation (64x64) with default parameters
-3. Compare statistics and generate plots
-4. Save results to pickle files
+2.  **Running the Comparison**:
+    Navigate to the `src` directory and run the main comparison script:
+
+    ```bash
+    cd src
+    python main_comparison.py
+    ```
+
+    This will:
+    - Run a **High-Resolution (256x256)** simulation as ground truth.
+    - Run a **Low-Resolution (64x64)** simulation with default parameters.
+    - Compare statistics and generate plots in the `figures/` directory (or locally, depending on script config).
+    - Save results to pickle files.
 
 ## The Resolution Gap
 
-**High-Resolution (256x256):**
-- Grid spacing: ~5.9 km
-- Resolves mesoscale eddies natively
-- Accurate representation of turbulent cascade
-- Computationally expensive
-
-**Low-Resolution (64x64):**
-- Grid spacing: ~23.4 km  
-- Missing eddies < 50 km
-- Needs subgrid parameterization
-- 16x faster computation
+- **High-Resolution (256x256)**: Grid spacing ~5.9 km. Resolves mesoscale eddies natively. Accurate but expensive.
+- **Low-Resolution (64x64)**: Grid spacing ~23.4 km. Missing eddies < 50 km. Needs subgrid parameterization. 16x faster.
 
 ## Tunable Subgrid Parameters
 
-Located in `config_lowres['subgrid_params']` in `main_comparison.py`:
+Located in `config_lowres['subgrid_params']` in `src/main_comparison.py`:
 
-### 1. `viscosity_scale` (default: 1.0)
-- **What it does**: Multiplies the hyperviscosity coefficient
-- **Why important**: Low-res needs more dissipation to remove energy at unresolved scales
-- **Tuning range**: 0.5 - 5.0
-- **Effect**: Higher = more damping of small scales
+1.  **`viscosity_scale`**: Multiplies hyperviscosity (damping).
+2.  **`drag_scale`**: Multiplies Ekman drag (friction).
+3.  **`eddy_diffusivity`**: Adds explicit subgrid mixing.
+4.  **`smagorinsky_coeff`**: Dynamic scale-dependent viscosity.
+5.  **`energy_correction`**: Backscatter energy to large scales.
+6.  **`enstrophy_correction`**: Dissipates small-scale vorticity.
 
-### 2. `drag_scale` (default: 1.0)
-- **What it does**: Multiplies the Ekman drag coefficient
-- **Why important**: Controls energy dissipation rate in lower layer
-- **Tuning range**: 0.5 - 3.0
-- **Effect**: Higher = more friction, faster spin-down
+## ML Optimization Strategy
 
-### 3. `eddy_diffusivity` (default: 0.0 m²/s)
+The tunable parameters are optimized using various ML techniques (Bayesian Opt, Genetic Algorithms, etc.) to minimize the error between Low-Res and High-Res statistics.
+
+See `docs/experiments_and_data.md` for detailed experimental plans.
+
+## References
+- Pedlosky (1987) - Geophysical Fluid Dynamics
+- Vallis (2017) - Atmospheric and Oceanic Fluid Dynamics
